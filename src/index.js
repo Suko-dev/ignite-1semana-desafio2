@@ -10,19 +10,55 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+
+  const user = users.find(item => item.username === username);
+  if (!user) {
+    return response.status(404).json({ error: 'usuário não encontrado' });
+  }
+  request.user = user;
+  next();
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const { user } = request;
+
+  if (user.todos.length >= 10 && user.pro === false) {
+    return response.status(403).json({ error: 'limite de todos alcançado. atualize para o plano pro para cadastrar mais todos' });
+  }
+  next();
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const { id } = request.params;
+  if (!validate(id)) {
+    return response.status(400).json({ error: 'uuid inválida' });
+  }
+  const { username } = request.headers;
+
+  const user = users.find(item => item.username === username);
+  if (!user) {
+    return response.status(404).json({ error: 'usuário não encontrado' });
+  }
+  const todo = user.todos.find(item => item.id === id);
+  if (!todo) {
+    return response.status(404).json({ error: 'todo não encontrado' });
+  }
+  request.user = user;
+  request.todo = todo;
+  next();
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const { id } = request.params;
+  console.log(id);
+  console.log(users);
+  const user = users.find(item => item.id === id);
+  if (!user) {
+    return response.status(404).json({ error: 'usuário não encontrado' });
+  }
+  request.user = user;
+  next();
 }
 
 app.post('/users', (request, response) => {
